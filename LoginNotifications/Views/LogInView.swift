@@ -8,27 +8,27 @@
 import SwiftUI
 
 struct LoginView: View {
-    @StateObject private var viewModel = LoginViewModel()
+    @ObservedObject var viewModel = LoginViewModel()
 
     var body: some View {
         ZStack {
-            
             LinearGradient(gradient: Gradient(colors: [Color.black, Color.blue]),
                            startPoint: .top,
                            endPoint: .bottom)
                 .edgesIgnoringSafeArea(.all)
-
+            
             VStack {
                 TextField("Введите логин", text: $viewModel.username)
                     .padding()
                     .background(Color.gray.opacity(0.2))
                     .cornerRadius(10)
                     .padding(.horizontal)
-
+                
                 Button(action: {
                     viewModel.checkLoginAttempt()
+                    viewModel.showConfirmation = true
                 }) {
-                    Text("Отправить запрос")
+                    Text("Войти")
                         .foregroundColor(.white)
                         .padding()
                         .background(Color.blue)
@@ -38,9 +38,7 @@ struct LoginView: View {
             }
         }
         .fullScreenCover(isPresented: $viewModel.showConfirmation) {
-            if let attempt = viewModel.loginAttempt {
-                ConfirmationView(viewModel: viewModel, loginAttempt: attempt)
-            }
+            ConfirmationView(viewModel: viewModel)
         }
     }
 }

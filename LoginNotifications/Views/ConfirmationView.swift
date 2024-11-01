@@ -9,16 +9,14 @@ import SwiftUI
 
 struct ConfirmationView: View {
     @ObservedObject var viewModel: LoginViewModel
-    let loginAttempt: LoginAttemptModel
 
     @State private var requestApproved: Bool? = nil
     @State private var borderColor: Color = Color.gray.opacity(0.5)
-    @State private var showWaitingIcon = false
+    @State private var showWaitingIcon = true
     @State private var showNewScreen = false
 
     var body: some View {
         ZStack {
-            
             LinearGradient(gradient: Gradient(colors: [Color.black, Color.blue]),
                            startPoint: .top,
                            endPoint: .bottom)
@@ -28,7 +26,7 @@ struct ConfirmationView: View {
                 HStack {
                     Button(action: {
                         withAnimation(.easeInOut(duration: 0.5)) {
-                            showNewScreen = true 
+                            showNewScreen = true
                         }
                     }) {
                         Image(systemName: "arrow.left")
@@ -53,15 +51,15 @@ struct ConfirmationView: View {
                                 Text(approved ? "Approved!" : "Denied!")
                                     .foregroundColor(approved ? .green : .red)
                                     .font(.title)
-                            } else {
-                                Text("Login: \(loginAttempt.login)")
+                            } else if let attempt = viewModel.loginAttempt {
+                                Text("Login: \(attempt.login)")
                                     .foregroundColor(.blue)
                                     .font(.largeTitle)
-                                Text("Browser: \(loginAttempt.browser)")
+                                Text("Browser: \(attempt.browser)")
                                     .foregroundColor(.white)
-                                Text("OS: \(loginAttempt.operatingSystem)")
+                                Text("OS: \(attempt.operatingSystem)")
                                     .foregroundColor(.white)
-                                Text("IP: \(loginAttempt.ipAddress)")
+                                Text("IP: \(attempt.ipAddress)")
                                     .foregroundColor(.white)
                             }
                         }
@@ -96,22 +94,36 @@ struct ConfirmationView: View {
                 Spacer()
             }
             .padding()
-
             
             if showNewScreen {
                 LoginView()
                     .transition(.move(edge: .trailing))
             }
         }
+        .onAppear {
+            viewModel.startCheckingForUpdates()
+        }
+        .onDisappear {
+            viewModel.stopCheckingForUpdates()
+        }
+        .onChange(of: viewModel.loginAttempt) { newAttempt in
+            // Сброс состояния при новом запросе
+            showWaitingIcon = newAttempt == nil
+            requestApproved = nil
+            borderColor = Color.gray.opacity(0.5)
+        }
     }
 
     private func handleDecision(approved: Bool) {
-        viewModel.submitDecision(approved: approved)
-        borderColor = approved ? Color.green : Color.red
         requestApproved = approved
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            borderColor = Color.gray.opacity(0.5)
+        borderColor = approved ? Color.green : Color.red
+        showWaitingIcon = false
+
+        viewModel.submitDecision(approved: approved)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             requestApproved = nil
+            borderColor = Color.gray.opacity(0.5)
             showWaitingIcon = true
         }
     }

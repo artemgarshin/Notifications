@@ -9,9 +9,10 @@ import Foundation
 import Foundation
 
 /// Модель для информации о попытке входа
-struct LoginAttemptModel: Codable {
+struct LoginAttemptModel: Codable, Equatable {
     let login: String
     let browser: String
     let operatingSystem: String
     let ipAddress: String
 }
+
