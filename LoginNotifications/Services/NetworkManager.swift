@@ -36,7 +36,7 @@ class NetworkManager {
     }
     
     func submitDecision(approved: Bool, completion: @escaping (String) -> Void) {
-        guard let url = URL(string: "http://<ваш_IP>:8080/submitDecision") else { return }
+        guard let url = URL(string: "http://loaclhost:8080/submitDecision") else { return }
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
