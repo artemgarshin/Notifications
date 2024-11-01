@@ -52,7 +52,6 @@ class LoginViewModel: ObservableObject {
                 }
             } else {
                 DispatchQueue.main.async {
-                    // Оставляем `showConfirmation` открытым, если он уже открыт
                     if self?.showConfirmation == true {
                         self?.loginAttempt = nil
                     } else {
